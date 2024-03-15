@@ -7,6 +7,7 @@ This module contains functionality to support the JIT's tracing frontend, notabl
 This is not intended to be imported directly; please use the exposed
 functionalities in `torch.jit`.
 """
+
 import contextlib
 
 import copy
@@ -17,14 +18,14 @@ import re
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Set, TypeVar
 
-from typing_extensions import ParamSpec
-
 import torch
 from torch._jit_internal import (
     _qualified_name,
     get_callable_argument_names,
     is_scripting,
 )
+
+from torch._utils_internal import log_torchscript_usage
 from torch.autograd import function
 from torch.jit._script import _CachedForward, script, ScriptModule
 
@@ -32,6 +33,8 @@ from torch.jit._state import _enabled, _python_cu
 from torch.nn import Module
 
 from torch.testing._comparison import default_tolerances
+
+from typing_extensions import ParamSpec
 
 _flatten = torch._C._jit_flatten
 _unflatten = torch._C._jit_unflatten
@@ -802,6 +805,8 @@ def trace(
         warnings.warn(
             "`optimize` is deprecated and has no effect. Use `with torch.jit.optimized_execution() instead"
         )
+
+    log_torchscript_usage("trace")
 
     if isinstance(func, torch.jit.ScriptModule):
         # it is hard to trace it because the forward method on ScriptModule is already defined, so it
