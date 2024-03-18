@@ -770,7 +770,7 @@ class BuiltinVariable(VariableTracker):
             handlers.append(call_self_handler)
 
         if obj.can_constant_fold_through():
-            builder = SourcelessBuilder().__call__
+            builder = SourcelessBuilder.create
 
             if (
                 all(issubclass(x, ConstantVariable) for x in arg_types)
@@ -1492,7 +1492,7 @@ class BuiltinVariable(VariableTracker):
                             for i, b in enumerate(bases)
                         ]
                     else:
-                        tuple_args = [SourcelessBuilder()(tx, b) for b in bases]
+                        tuple_args = [SourcelessBuilder.create(tx, b) for b in bases]
 
                     return variables.TupleVariable(tuple_args, **options)
             except NotImplementedError:
@@ -1533,7 +1533,7 @@ class BuiltinVariable(VariableTracker):
             if source is not None:
                 return VariableBuilder(tx, source)(member)
             else:
-                return SourcelessBuilder()(tx, member)
+                return SourcelessBuilder.create(tx, member)
         elif istype(obj, UserFunctionVariable) and name in ("__name__", "__module__"):
             return ConstantVariable.create(getattr(obj.fn, name))
         else:
@@ -1681,7 +1681,7 @@ class BuiltinVariable(VariableTracker):
             ) from None
 
         if obj.source is None:
-            return SourcelessBuilder()(tx, py_type)
+            return SourcelessBuilder.create(tx, py_type)
         else:
             return VariableBuilder(tx, TypeSource(obj.source))(py_type)
 
